@@ -1,0 +1,9 @@
+version: '3.8'
+services:
+  iptv:
+    build: ./backend
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./backend/data:/app/data
+    restart: unless-stopped
