@@ -1,9 +1,39 @@
 version: '3.8'
+
 services:
   iptv:
-    build: ./backend
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: iptv-movistar
     ports:
       - "8080:8080"
+    environment:
+      # URLs de xTeVe - Modificar según tu configuración
+      - M3U_URL=http://192.168.1.198:34400/m3u/xteve.m3u
+      - XMLTV_URL=http://192.168.1.198:34400/xmltv/xteve.xml
+      # Configuración opcional
+      - TZ=America/Lima
+      - LOG_LEVEL=info
     volumes:
-      - ./backend/data:/app/data
+      - iptv-data:/app/data
+      - iptv-logs:/app/logs
     restart: unless-stopped
+    networks:
+      - iptv-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8080/api/health').read()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  iptv-network:
+    driver: bridge
+
+volumes:
+  iptv-data:
+    driver: local
+  iptv-logs:
+    driver: local
